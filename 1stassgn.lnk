@@ -1,0 +1,100 @@
+CREATE DATABASE 1STASSIGN;
+USE 1STASSIGN;
+CREATE TABLE Customers (
+CustomerID INT PRIMARY KEY,
+Name VARCHAR(255),
+Email VARCHAR(255),
+JoinDate DATE
+);
+
+CREATE TABLE Products (
+ProductID INT PRIMARY KEY,
+Name VARCHAR(255),
+Category VARCHAR(255),
+Price DECIMAL(10, 2)
+);
+
+CREATE TABLE Orders (
+OrderID INT PRIMARY KEY,
+CustomerID INT,
+OrderDate DATE,
+TotalAmount DECIMAL(10, 2),
+FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
+
+CREATE TABLE OrderDetails (
+OrderDetailID INT PRIMARY KEY,
+OrderID INT,
+ProductID INT,
+Quantity INT,
+PricePerUnit DECIMAL(10, 2),
+FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
+FOREIGN KEY (ProductID) REFERENCES Products(ProductID)
+);
+
+INSERT INTO Customers (CustomerID, Name, Email, JoinDate) VALUES
+(1, 'John Doe', 'johndoe@example.com', '2020-01-10'),
+(2, 'Jane Smith', 'janesmith@example.com', '2020-01-15'),
+-- ... Additional 7 records ...
+(10, 'Alice Johnson', 'alicejohnson@example.com', '2020-03-05');
+
+INSERT INTO Products (ProductID, Name, Category, Price) VALUES
+(1, 'Laptop', 'Electronics', 999.99),
+(2, 'Smartphone', 'Electronics', 499.99),
+-- ... Additional 7 records ...
+(10, 'Desk Lamp', 'Home Decor', 29.99);
+
+
+select * from Customers;
+
+SELECT CustomerID, Name, Email, JoinDate FROM Customers;
+
+SELECT * FROM Products
+WHERE Category = 'Electronics';
+
+SELECT ProductID, Name, Category, Price FROM Products
+WHERE Category = 'Electronics';
+
+SELECT COUNT(*) AS TotalOrders FROM Orders;
+
+SELECT * FROM Orders ORDER BY OrderDate DESC LIMIT 1;
+
+
+### Joins and Relationships
+
+SELECT O.OrderID,O.OrderDate,COUNT(OD.ProductID) AS NumberOfProducts FROM Orders O JOIN OrderDetails OD = OD.OrderID GROUP BY O.OrderID, O.OrderDate HAVING COUNT(OD.ProductID) > 1;
+
+
+SELECT C.CustomerID, C.CustomerName, SUM(OD.Quantity * OD.PricePerUnit) AS TotalSalesAmount
+FROM Customers C JOIN Orders O = O.CustomerID JOIN OrderDetails OD ON O.OrderID = OD.OrderID
+GROUP BY C.CustomerID, C.Name;
+
+###  Aggregation and Grouping 
+
+
+SELECT P.Category, SUM(OD.Quantity * OD.PricePerUnit) AS TotalRevenue FROM Products P JOIN OrderDetails OD ON P.ProductID = OD.ProductID
+JOIN Orders O ON OD.OrderID = O.OrderID JOIN Customers C = C.CustomerID GROUP BY P.Category;
+
+SELECT AVG(TotalAmount) AS AverageOrderValue FROM Orders;
+
+SELECT EXTRACT(MONTH FROM OrderDate) AS OrderMonth, COUNT(*) AS NumberOfOrders
+FROM Orders GROUP BY OrderMonth ORDER BY NumberOfOrders DESC LIMIT 1;
+
+###  Subqueries and Nested Queries 
+
+SELECT C.CustomerID, C.CustomerName FROM Customers C LEFT JOIN Orders O ON C.CustomerID = O.CustomerID
+WHERE O.CustomerID IS NULL;
+
+SELECT P.ProductID, P.ProductName FROM Products P LEFT JOIN OrderDetails OD ON P.ProductID = OD.ProductID
+WHERE OD.ProductID IS NULL;
+
+SELECT P.ProductID, P.ProductName, SUM(OD.Quantity) AS TotalQuantitySold FROM Products P JOIN
+OrderDetails OD ON P.ProductID = OD.ProductID GROUP BY P.ProductID,  ORDER BY TotalQuantitySold DESC
+LIMIT 3;
+
+###  Date and Time Functions
+
+
+SELECT OrderID, CustomerID, OrderDate, TotalAmount FROM Orders WHERE OrderDate >= CURDATE() - INTERVAL 1 MONTH;
+
+SELECT CustomerID, Name AS CustomerName, JoinDate FROM Customers ORDER BY JoinDate ASC LIMIT 1;
